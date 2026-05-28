@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environments
+venv/
+.venv/
+.venv311/
+venv-2/
+
+# Node
+node_modules/
+
+# Next / React
+.next/
+dist/
+build/
+
+# Tauri / Rust
+target/
+
+# Environment Files
+.env
+.env.local
+
+# Logs
+*.log
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# AI / Torch / Models
+models/
+checkpoints/
+weights/
+
+# Mac / Windows
+.DS_Store
+Thumbs.db
+
+# Generated folders
+generated-projects/
+
+# Python site packages
+Lib/
+Scripts/
+Include/
+
+# IDE
+.vscode/settings.json

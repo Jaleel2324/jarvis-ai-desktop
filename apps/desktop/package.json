@@ -1,0 +1,25 @@
+{
+  "name": "jarvis-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.0.0",
+    "@types/three": "^0.183.1",
+    "tauri-plugin-mic-recorder-api": "^2.0.0",
+    "three": "^0.183.2"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.0.0",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0"
+  }
+}

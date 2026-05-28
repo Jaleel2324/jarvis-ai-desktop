@@ -1,0 +1,220 @@
+import json
+from datetime import datetime
+
+from autonomous_session import (
+    load_autonomous_session,
+    update_autonomous_session,
+)
+
+from autonomous_validator import (
+    run_autonomous_validation,
+)
+
+from safe_writer import safe_ai_edit
+
+from rollback_manager import rollback_file
+
+
+def apply_autonomous_patch():
+    session = load_autonomous_session()
+
+    if not session:
+        return {
+            "success": False,
+            "error": (
+                "No autonomous session found."
+            ),
+        }
+
+    patch = session.get("last_patch")
+
+    if not patch:
+        return {
+            "success": False,
+            "error": (
+                "No autonomous patch found. "
+                "Run: plan autonomous patch"
+            ),
+        }
+
+    proposed_changes = patch.get(
+        "proposed_changes",
+        []
+    )
+
+    if not proposed_changes:
+        return {
+            "success": False,
+            "error": (
+                "Patch contains no proposed changes."
+            ),
+        }
+
+    applied_changes = []
+    rollback_targets = []
+
+    for change in proposed_changes:
+        path = change.get("path")
+        instructions = change.get("instructions")
+
+        if not path or not instructions:
+            continue
+
+        result = safe_ai_edit(
+            path,
+            instructions
+        )
+
+        if not result.get("success"):
+            rollback_errors = []
+
+            for rollback_item in rollback_targets:
+                try:
+                    rollback_file(
+                        rollback_item["backup"],
+                        rollback_item["path"],
+                    )
+                except Exception as rollback_error:
+                    rollback_errors.append(
+                        str(rollback_error)
+                    )
+
+            session["status"] = "patch_failed"
+
+            update_autonomous_session(session)
+
+            return {
+                "success": False,
+                "error": result.get(
+                    "error",
+                    "Unknown patch failure."
+                ),
+                "rollback_errors": rollback_errors,
+                "failed_change": change,
+            }
+
+        applied_changes.append({
+            "path": path,
+            "backup": result.get("backup"),
+            "syntax": result.get("syntax"),
+        })
+
+        rollback_targets.append({
+            "path": path,
+            "backup": result.get("backup"),
+        })
+
+    validation_result = run_autonomous_validation()
+
+    if not validation_result.get("success"):
+        rollback_errors = []
+
+        for rollback_item in rollback_targets:
+            try:
+                rollback_file(
+                    rollback_item["backup"],
+                    rollback_item["path"],
+                )
+            except Exception as rollback_error:
+                rollback_errors.append(
+                    str(rollback_error)
+                )
+
+        session["status"] = "validation_failed"
+
+        update_autonomous_session(session)
+
+        return {
+            "success": False,
+            "error": (
+                "Validation failed after patch application."
+            ),
+            "validation": validation_result,
+            "rollback_errors": rollback_errors,
+        }
+
+    completed_steps = session.get(
+        "completed_steps",
+        []
+    )
+
+    current_step = session.get(
+        "current_step",
+        0
+    )
+
+    completed_steps.append(current_step)
+
+    session["completed_steps"] = completed_steps
+    session["current_step"] = current_step + 1
+    session["status"] = "patch_applied"
+    session["last_patch_applied_at"] = (
+        datetime.now().isoformat()
+    )
+
+    edited_files = session.get(
+        "edited_files",
+        []
+    )
+
+    for applied in applied_changes:
+        edited_files.append(
+            applied["path"]
+        )
+
+    session["edited_files"] = list(
+        set(edited_files)
+    )
+
+    update_autonomous_session(session)
+
+    return {
+        "success": True,
+        "applied_changes": applied_changes,
+        "validation": validation_result,
+        "session": session,
+    }
+
+
+def format_patch_application(result: dict):
+    if not result.get("success"):
+        rollback_errors = result.get(
+            "rollback_errors",
+            []
+        )
+
+        rollback_text = "\n".join(
+            [f"- {item}" for item in rollback_errors]
+        )
+
+        return (
+            "AUTONOMOUS PATCH FAILED\n\n"
+            f"Error:\n{result.get('error')}\n\n"
+            "Rollback Errors:\n"
+            f"{rollback_text or '- None'}"
+        )
+
+    applied_changes = result.get(
+        "applied_changes",
+        []
+    )
+
+    applied_text = "\n".join(
+        [
+            (
+                f"- {item.get('path')}\n"
+                f"  Backup: {item.get('backup')}\n"
+                f"  Syntax: {item.get('syntax') or 'Passed'}"
+            )
+            for item in applied_changes
+        ]
+    )
+
+    return (
+        "AUTONOMOUS PATCH APPLIED\n\n"
+        "Applied Changes:\n"
+        f"{applied_text or '- None'}\n\n"
+        "Validation:\n"
+        "PASSED\n\n"
+        "Autonomous session updated successfully."
+    )

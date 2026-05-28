@@ -1,0 +1,21 @@
+ Volume in drive C is Windows
+ Volume Serial Number is 24B7-DA26
+
+ Directory of C:\Users\arizo\OneDrive\Desktop\jarvis-os\services\agent-api
+
+05/07/2026  10:45 PM    <DIR>          .
+05/07/2026  05:44 AM    <DIR>          ..
+05/07/2026  06:41 AM               179 .env
+05/07/2026  07:33 AM    <DIR>          .venv
+05/07/2026  08:38 PM             8,996 conversation.py
+05/07/2026  07:37 AM               405 database.py
+05/07/2026  09:00 PM             1,252 file_builder.py
+05/07/2026  08:55 PM             1,032 generator.py
+05/07/2026  06:29 PM            16,384 jarvis_memory.db
+05/07/2026  10:49 PM             9,383 main.py
+05/07/2026  07:42 AM               261 models.py
+05/07/2026  08:49 PM             1,154 planner.py
+05/07/2026  10:45 PM             1,267 task_engine.py
+05/07/2026  10:49 PM    <DIR>          __pycache__
+              10 File(s)         40,313 bytes
+               4 Dir(s)  93,145,382,912 bytes free

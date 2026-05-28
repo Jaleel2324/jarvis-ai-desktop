@@ -1,0 +1,39 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #050816;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+nav {
+  padding: 20px 60px;
+  border-bottom: 1px solid #00ffd5;
+}
+
+.hero {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.hero h2 {
+  font-size: 3rem;
+}
+
+button {
+  padding: 14px 28px;
+  border: none;
+  border-radius: 12px;
+  background: #00ffd5;
+  font-weight: bold;
+  cursor: pointer;
+}

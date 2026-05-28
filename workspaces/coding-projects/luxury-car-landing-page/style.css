@@ -1,0 +1,278 @@
+```css
+/* Global Styles */
+
+* {
+   box-sizing: border-box;
+   margin: 0;
+   padding: 0;
+}
+
+body {
+   font-family: Arial, sans-serif;
+   font-size: 16px;
+   line-height: 1.5;
+   color: #333;
+   background-color: var(--dark-background);
+   opacity: 0.8;
+
+   /* Add transition effect for opacity */
+   transition: opacity 0.2s ease-in-out;
+}
+
+a {
+   text-decoration: none;
+   color: inherit;
+}
+
+a:hover {
+   color: var(--glow-accent);
+}
+
+h1, h2, h3, h4, h5, h6 {
+   font-weight: normal;
+   color: var(--light-critique-accent);
+   margin-bottom: 0.5rem;
+
+   /* Add glow animation */
+   transition: transform 0.2s ease-in-out, color 0.25s ease-in-out;
+}
+
+/* Header */
+
+header {
+   background-color: var(--light-background);
+   border-bottom: solid 10px var(--dark-highlight);
+   padding-top: 2em;
+
+   /* Add glow animation for dark highlight */
+   transition: transform 0.5s ease-in-out;
+
+   position: fixed;
+   top: 0;
+   left: 0;
+   width: 100%;
+}
+
+header .logo {
+   margin-right: 20px;
+   font-weight: bold;
+   font-size: 24px;
+}
+
+header nav ul {
+   list-style: none;
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+
+   /* Add glow animation */
+   transition: transform 0.5s ease-in-out, color 0.25s ease-in-out;
+}
+
+header nav li {
+   margin-right: 30px;
+}
+
+header nav a {
+   transition: color 0.2s ease-in-out;
+}
+
+header nav a:hover {
+   color: var(--light-critique-accent);
+}
+
+/* Hero Section */
+
+ HERO_SECTION {
+   position: relative;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   height: 100vh;
+   padding-bottom: 50%;
+   overflow-x: hidden;
+
+   /* Add glow animation on scroll */
+   transition: all 1.2s ease-in-out;
+
+}
+
+HERO_SECTION:: BEFORE {
+   content: "";
+   position: absolute;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   background-color: var(--glow-accent);
+   opacity: 0.7;
+
+   /* Add glow animation on scroll */
+   transition: all 1.2s ease-in-out;
+}
+
+HERO_SECTION:: AFTER {
+   content: "";
+   position: absolute;
+   top: 50%;
+   left: 0;
+   width: 100%;
+   height: 50%;
+   background-color: var(--glow-accent);
+
+   /* Add glow animation on scroll */
+   transition: all 1.2s ease-in-out, opacity 1s ease-in-out;
+}
+
+.HERO_SECTION__IMAGE {
+   max-width: 80%;
+
+   /* Add glow animation */
+   transition: transform 0.5s ease-in-out, border-color 0.25s ease-in-out;
+}
+
+ HEROSECTION .description {
+   color: #fff;
+   text-align: center;
+}
+
+ HEROSECTION hr {
+   border-top-color: var(--light-highlight);
+
+   /* Add fade effect */
+   animation: glow 2s infinite;
+   transition: all 0.5s ease-in-out;
+}
+
+@keyframes glow {
+   100% {
+       background-color: var(--glow-accent);
+   }
+}
+
+/* Features Content Section */
+
+.FEATURES SECTION {
+   display: grid;
+   gap: 20px;
+   padding: 60px;
+
+   /* Add fade effect */
+   animation: pulse 2s infinite;
+   transition: all 0.5s ease-in-out;
+}
+
+.feature-section .title {
+   font-size: 24px;
+   color: var(--light-critique-accent);
+}
+
+.feature-section .description {
+   margin-bottom: 40px;
+   color: #999;
+
+   /* Add glow animation */
+   transition: transform 0.5s ease-in-out, color 0.25s ease-in-out;
+}
+
+/* Features Cards */
+
+.FEATURES.cards {
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+   gap: 20px;
+
+   /* Add fade effect */
+   animation: pulse 2s infinite;
+   transition: all 0.5s ease-in-out;
+}
+
+.feature-card .image {
+   width: 100%;
+   object-fit: cover;
+   border-radius: 10px 10px 0 0;
+
+   /* Add glow animation */
+   transition: transform 0.5s ease-in-out, border-color 0.25s ease-in-out;
+}
+
+.feature-card .content {
+   padding-top: 30px;
+
+   /* Add fade effect */
+   animation: pulse 2s infinite;
+   transition: all 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+   50% {
+       opacity: 0.8;
+   }
+}
+
+/* Footer */
+
+footer {
+   background-color: var(--dark-background);
+   color: #fff;
+
+   /* Add glow animation for footer */
+   transition: transform 0.5s ease-in-out, border-bottom-width 0.25s ease-in-out;
+}
+
+footer .copyright {
+   text-align: center;
+   font-size: 14px;
+   padding-top: 20px;
+
+   /* Add fade effect */
+   animation: pulse 2s infinite;
+   transition: all 0.5s ease-in-out;
+}
+
+/* Media Queries */
+
+@media (max-width: 768px) {
+   header {
+      
+      border-bottom: none;
+
+      /* Add glow animation for dark highlight on mobile */
+      transition: transform 0.5s ease-in-out, color 0.25s ease-in-out;
+   }
+
+   .FEATURES SECTION {
+
+      
+      padding: 40px;
+
+      /* Add fade effect */
+      animation: pulse 2s infinite;
+      transition: all 0.5s ease-in-out;
+   }
+
+   footer {
+      
+      margin-bottom: 20px;
+
+      /* Add glow animation for footer on mobile */
+      transition: transform 0.5s ease-in-out, border-bottom-width 0.25s ease-in-out;
+   }
+}
+
+@media (max-width: 480px) {
+   header {
+
+      position: relative;
+
+      /* Add glow animation */
+      transition: all 1.2s ease-in-out;
+   }
+
+   footera {
+
+      /* Fade effect for light highlight at the end at lower resolution screen */
+      opacity: 0.9;
+
+   }
+}
