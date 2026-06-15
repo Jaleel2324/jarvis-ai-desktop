@@ -1,0 +1,3 @@
+{"type": "new_lead", "timestamp": "2026-06-14T23:37:08.000472", "source": "portfolio", "name": "Test Lead", "email": "test@example.com", "company": "Test Company", "project_type": "Business Website", "budget": "$1,500", "message": "Testing Jarvis lead notifications"}
+{"type": "new_lead", "timestamp": "2026-06-15T00:20:31.845092", "source": "portfolio", "name": "Tesla", "email": "contact@tesla.com", "company": "Tesla", "project_type": "AI Platform", "budget": "$5000+", "message": "Testing notification"}
+{"type": "new_lead", "timestamp": "2026-06-15T01:07:19.475471", "source": "jaleel.dev", "name": "Zahir Muhammad", "email": "test@test.com", "company": "Bigsby Coffe", "project_type": "Full-Stack Web App", "budget": "$1,000 - $2,500", "message": "New project"}

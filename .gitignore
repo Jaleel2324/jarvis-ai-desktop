@@ -52,3 +52,4 @@ Include/
 
 # IDE
 .vscode/settings.json
+services/agent-api/.env

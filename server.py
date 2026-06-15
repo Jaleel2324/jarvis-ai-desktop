@@ -300,6 +300,17 @@ class TaskRequest(BaseModel):
     working_dir: str = "."
 
 
+class BusinessLeadRequest(BaseModel):
+    """Lead notification payload from jaleel.dev or future business webhooks."""
+    source: str = "portfolio"
+    name: str
+    email: str
+    company: Optional[str] = None
+    project_type: Optional[str] = None
+    budget: Optional[str] = None
+    message: Optional[str] = None
+
+
 # ---------------------------------------------------------------------------
 # Claude Task Manager
 # ---------------------------------------------------------------------------
@@ -1432,6 +1443,204 @@ async def api_list_projects():
     global cached_projects
     cached_projects = await scan_projects()
     return {"projects": cached_projects}
+
+
+@app.post("/api/business/lead")
+async def api_business_lead(lead: BusinessLeadRequest):
+    """Receive a new business lead from the portfolio.
+
+    This is intentionally additive and does not change the existing JARVIS
+    voice, WebSocket, task, calendar, mail, or memory flow.
+    """
+    timestamp = datetime.now().isoformat()
+
+    lead_data = {
+        "type": "new_lead",
+        "timestamp": timestamp,
+        "source": lead.source,
+        "name": lead.name,
+        "email": lead.email,
+        "company": lead.company,
+        "project_type": lead.project_type,
+        "budget": lead.budget,
+        "message": lead.message,
+    }
+
+    # Save lead locally so JARVIS has a simple business inbox to read later.
+    try:
+        leads_file = Path(__file__).parent / "data" / "business_leads.jsonl"
+        leads_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(leads_file, "a", encoding="utf-8") as f:
+            f.write(json.dumps(lead_data) + "\n")
+    except Exception as e:
+        log.warning(f"Could not save business lead: {e}")
+
+    # Push a lightweight event to any connected JARVIS websocket clients.
+    try:
+        await task_manager._notify({
+            "type": "business_lead",
+            "lead": lead_data,
+            "message": f"New lead from {lead.name}: {lead.project_type or 'Project inquiry'}",
+        })
+    except Exception as e:
+        log.warning(f"Could not notify business lead: {e}")
+
+    log.info(
+        "Business lead received from %s: %s <%s> — %s",
+        lead.source,
+        lead.name,
+        lead.email,
+        lead.project_type or "No project type",
+    )
+
+    return {
+        "success": True,
+        "message": "Lead received by JARVIS.",
+        "lead": lead_data,
+    }
+
+
+@app.get("/api/business/leads")
+async def api_business_leads(limit: int = 25):
+    """Return recent business leads saved by JARVIS."""
+    leads_file = Path(__file__).parent / "data" / "business_leads.jsonl"
+
+    if not leads_file.exists():
+        return {"success": True, "leads": []}
+
+    try:
+        lines = leads_file.read_text(encoding="utf-8").splitlines()
+        leads = [json.loads(line) for line in lines if line.strip()]
+        return {"success": True, "leads": leads[-limit:]}
+    except Exception as e:
+        log.warning(f"Could not read business leads: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": "Could not read business leads"},
+        )
+
+
+@app.get("/api/business/calendly")
+async def api_business_calendly(limit: int = 10):
+    """Find recent Calendly booking emails from Apple Mail.
+
+    This uses the existing READ-ONLY Mail.app integration. It does not modify
+    mail, calendar, voice, WebSocket, task, or memory behavior.
+    """
+    try:
+        emails = await search_mail("Calendly", count=limit)
+
+        bookings = []
+        for email in emails:
+            booking = {
+                "type": "calendly_booking_email",
+                "source": "calendly_email",
+                "sender": email.get("sender"),
+                "subject": email.get("subject"),
+                "date": email.get("date"),
+                "read": email.get("read"),
+                "preview": email.get("preview", ""),
+            }
+            bookings.append(booking)
+
+        return {
+            "success": True,
+            "count": len(bookings),
+            "bookings": bookings,
+        }
+    except Exception as e:
+        log.warning(f"Could not search Calendly bookings: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": "Could not search Calendly bookings"},
+        )
+
+
+@app.post("/api/business/calendly/save")
+async def api_business_calendly_save(limit: int = 10):
+    """Search recent Calendly emails and save them to JARVIS booking inbox."""
+    try:
+        emails = await search_mail("Calendly", count=limit)
+
+        bookings_file = Path(__file__).parent / "data" / "business_bookings.jsonl"
+        bookings_file.parent.mkdir(parents=True, exist_ok=True)
+
+        existing_keys = set()
+        if bookings_file.exists():
+            for line in bookings_file.read_text(encoding="utf-8").splitlines():
+                if not line.strip():
+                    continue
+                try:
+                    item = json.loads(line)
+                    existing_keys.add(
+                        f"{item.get('sender')}|{item.get('subject')}|{item.get('date')}"
+                    )
+                except Exception:
+                    pass
+
+        saved = []
+        with open(bookings_file, "a", encoding="utf-8") as f:
+            for email in emails:
+                booking = {
+                    "type": "calendly_booking_email",
+                    "saved_at": datetime.now().isoformat(),
+                    "source": "calendly_email",
+                    "sender": email.get("sender"),
+                    "subject": email.get("subject"),
+                    "date": email.get("date"),
+                    "read": email.get("read"),
+                    "preview": email.get("preview", ""),
+                }
+
+                key = f"{booking.get('sender')}|{booking.get('subject')}|{booking.get('date')}"
+                if key in existing_keys:
+                    continue
+
+                f.write(json.dumps(booking) + "\n")
+                existing_keys.add(key)
+                saved.append(booking)
+
+        if saved:
+            try:
+                await task_manager._notify({
+                    "type": "business_booking",
+                    "bookings": saved,
+                    "message": f"{len(saved)} new Calendly booking email(s) saved.",
+                })
+            except Exception as e:
+                log.warning(f"Could not notify Calendly booking save: {e}")
+
+        return {
+            "success": True,
+            "message": f"Saved {len(saved)} new Calendly booking email(s).",
+            "saved": saved,
+        }
+    except Exception as e:
+        log.warning(f"Could not save Calendly bookings: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": "Could not save Calendly bookings"},
+        )
+
+
+@app.get("/api/business/bookings")
+async def api_business_bookings(limit: int = 25):
+    """Return saved Calendly booking emails from JARVIS booking inbox."""
+    bookings_file = Path(__file__).parent / "data" / "business_bookings.jsonl"
+
+    if not bookings_file.exists():
+        return {"success": True, "bookings": []}
+
+    try:
+        lines = bookings_file.read_text(encoding="utf-8").splitlines()
+        bookings = [json.loads(line) for line in lines if line.strip()]
+        return {"success": True, "bookings": bookings[-limit:]}
+    except Exception as e:
+        log.warning(f"Could not read business bookings: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"success": False, "error": "Could not read business bookings"},
+        )
 
 
 # -- Fast Action Detection (no LLM call) -----------------------------------
@@ -2599,3 +2808,4 @@ if __name__ == "__main__":
         log_level="info",
         **ssl_kwargs,
     )
+
