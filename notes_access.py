@@ -198,3 +198,17 @@ end tell
 '''
     raw = await _run_notes_script(script)
     return [f.strip() for f in raw.split("\n") if f.strip()]
+def get_recent_notes(*args, **kwargs):
+    return []
+
+def read_note(*args, **kwargs):
+    return None
+
+def search_notes_apple(*args, **kwargs):
+    return []
+
+def create_apple_note(*args, **kwargs):
+    return {
+        "success": False,
+        "message": "Apple Notes integration is not configured yet."
+    }
